@@ -2,10 +2,46 @@
 
 {% block content %}
 <h1>Design.pro - Главная страница</h1>
-<p>Добро пожаловать в Design.pro!</p>
+
+<p>Добро пожаловать в Design.pro! Мы создаем уют и гармонию в вашем пространстве.</p>
+
 {% if user.is_authenticated %}
-    <p>Вы вошли как: {{ user.get_username }}</p>
+  <p>Вы вошли как: <strong>{{ user.get_username }}</strong></p>
 {% else %}
-    <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a> для доступа к полному функционалу.</p>
+  <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a> для доступа к полному функционалу.</p>
 {% endif %}
+
+<!-- Счетчик заявок в работе -->
+<div class="alert alert-info" role="alert">
+  <h4>Сейчас в работе: <strong>{{ num_applications_in_progress }}</strong> заявок</h4>
+</div>
+
+<!-- Блок с выполненными работами -->
+<h2>Наши последние работы</h2>
+
+{% if completed_applications %}
+<div class="row">
+  {% for app in completed_applications %}
+  <div class="col-md-3 mb-4">
+    <div class="card h-100">
+      {% if app.image %}
+        <img src="{{ app.image.url }}" class="card-img-top" alt="{{ app.title }}" style="height: 200px; object-fit: cover;">
+      {% else %}
+        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+          <span class="text-muted">Нет изображения</span>
+        </div>
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ app.title }}</h5>
+        <p class="card-text"><small class="text-muted">{{ app.created_at|date:"d.m.Y H:i" }}</small></p>
+        <p class="card-text"><strong>Категория:</strong> {{ app.category.name }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+  <p>Пока нет выполненных работ для показа.</p>
+{% endif %}
+
 {% endblock %}

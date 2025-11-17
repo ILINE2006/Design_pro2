@@ -11,5 +11,6 @@ urlpatterns = [
     path('applications/', views.ApplicationListView.as_view(), name='my-applications'),
     path('application/<int:pk>', views.ApplicationDetailView.as_view(), name='application-detail'),
     path('application/create/', views.create_application, name='application-create'),
+path('application/<int:pk>/delete/', views.ApplicationDeleteView.as_view(), name='application-delete'),
     path('categories/', views.CategoryListView.as_view(), name='category-list'),
 ]

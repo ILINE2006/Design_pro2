@@ -1,22 +1,50 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Мои заявки</h1>
+<h1>Мои заявки</h1>
 
-  <a href="{% url 'application-create' %}" class="btn btn-primary mb-3">Создать новую заявку</a>
+<a href="{% url 'application-create' %}" class="btn btn-primary mb-3">Создать новую заявку</a>
 
-  {% if application_list %}
-    <ul class="list-group">
-      {% for application in application_list %}
-      <li class="list-group-item">
-        <h4><a href="{{ application.get_absolute_url }}">{{ application.title }}</a></h4>
-        <p><strong>Категория:</strong> {{ application.category }}</p>
-        <p><strong>Статус:</strong> {{ application.get_status_display }}</p>
-        <p><strong>Создана:</strong> {{ application.created_at }}</p>
-      </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>У вас пока нет заявок.</p>
-  {% endif %}
+<!-- Форма фильтрации по статусу -->
+<form method="get" class="mb-4">
+  <div class="form-group">
+    <label for="status_filter">Фильтр по статусу:</label>
+    <select name="status" id="status_filter" class="form-control" onchange="this.form.submit()" style="width: auto; display: inline-block;">
+      <option value="">Все заявки</option>
+      <option value="new" {% if current_status == 'new' %}selected{% endif %}>Новая</option>
+      <option value="in_progress" {% if current_status == 'in_progress' %}selected{% endif %}>Принято в работу</option>
+      <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Выполнено</option>
+    </select>
+  </div>
+</form>
+
+{% if application_list %}
+  <ul class="list-group">
+    {% for application in application_list %}
+    <li class="list-group-item">
+      <h4><a href="{{ application.get_absolute_url }}">{{ application.title }}</a></h4>
+      <p><strong>Описание:</strong> {{ application.description|truncatewords:20 }}</p>
+      <p><strong>Категория:</strong> {{ application.category }}</p>
+      <p><strong>Статус:</strong>
+        <span class="badge
+          {% if application.status == 'new' %}badge-secondary
+          {% elif application.status == 'in_progress' %}badge-warning
+          {% else %}badge-success{% endif %}">
+          {{ application.get_status_display }}
+        </span>
+      </p>
+      <p><strong>Создана:</strong> {{ application.created_at|date:"d.m.Y H:i" }}</p>
+
+      <!-- Кнопка удаления (показывается только для заявок со статусом "Новая") -->
+      {% if application.status == 'new' %}
+      <div>
+        <a href="{% url 'application-delete' application.pk %}" class="btn btn-danger btn-sm">Удалить заявку</a>
+      </div>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>У вас пока нет заявок.</p>
+{% endif %}
 {% endblock %}
