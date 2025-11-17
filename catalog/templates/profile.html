@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Профиль пользователя</h1>
+
+<div class="profile-info">
+    <p><strong>ФИО:</strong> {{ user.first_name }}</p>
+    <p><strong>Логин:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Дата регистрации:</strong> {{ user.date_joined }}</p>
+    <p><strong>Последний вход:</strong> {{ user.last_login }}</p>
+</div>
+
+<div class="profile-actions">
+    <a href="{% url 'index' %}" class="btn btn-primary">На главную</a>
+</div>
+{% endblock %}

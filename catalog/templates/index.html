@@ -1,0 +1,11 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Design.pro - Главная страница</h1>
+<p>Добро пожаловать в Design.pro!</p>
+{% if user.is_authenticated %}
+    <p>Вы вошли как: {{ user.get_username }}</p>
+{% else %}
+    <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a> для доступа к полному функционалу.</p>
+{% endif %}
+{% endblock %}
