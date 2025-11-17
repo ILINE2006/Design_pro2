@@ -6,11 +6,27 @@ from .forms import RegisterForm
 from django.views import generic
 from .models import Application, Category
 from .forms import ApplicationForm
-
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import DeleteView
+from django.urls import reverse_lazy
 
 
 def index(request):
-    return render(request, 'index.html')
+    """View function for home page of site."""
+
+    # Генерируем counts некоторых главных объектов
+    num_applications_in_progress = Application.objects.filter(status='in_progress').count()
+
+    # Получаем 4 последние ВЫПОЛНЕННЫЕ заявки
+    num_completed_applications = Application.objects.filter(status='completed').order_by('-created_at')[:4]
+
+    context = {
+        'num_applications_in_progress': num_applications_in_progress,
+        'completed_applications': num_completed_applications,
+    }
+
+    # Рендерим HTML-шаблон index.html с данными внутри переменной context
+    return render(request, 'index.html', context=context)
 
 
 @login_required
@@ -73,20 +89,54 @@ def create_application(request):
     return render(request, 'catalog/application_form.html', {'form': form})
 
 
-class ApplicationListView(generic.ListView):
+class ApplicationListView(LoginRequiredMixin, generic.ListView):
     """Generic class-based view listing applications of current user."""
     model = Application
     template_name = 'catalog/application_list.html'
     paginate_by = 10
 
     def get_queryset(self):
-        return Application.objects.filter(user=self.request.user)
+        # Получаем базовый queryset - все заявки пользователя
+        qs = Application.objects.filter(user=self.request.user)
+
+        # Получаем параметр фильтра из GET-запроса
+        status_filter = self.request.GET.get('status', None)
+
+        # Если параметр передан и он не пустой, применяем фильтр
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        # Добавляем в контекст текущее значение фильтра
+        context = super().get_context_data(**kwargs)
+        context['current_status'] = self.request.GET.get('status', '')
+        return context
 
 
-class ApplicationDetailView(generic.DetailView):
-    """Generic class-based view detailing an application."""
+class ApplicationDeleteView(LoginRequiredMixin, DeleteView):
+    """Generic class-based view for deleting an application."""
     model = Application
-    template_name = 'catalog/application_detail.html'
+    template_name = 'catalog/application_confirm_delete.html'
+    success_url = reverse_lazy('my-applications')
+
+    def get_queryset(self):
+        # Пользователь может удалять только свои заявки
+        qs = super().get_queryset()
+        return qs.filter(user=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        # Получаем объект для удаления
+        self.object = self.get_object()
+
+        # Проверяем, можно ли удалять заявку (статус "Новая")
+        if self.object.can_be_deleted():
+            return super().delete(request, *args, **kwargs)
+        else:
+            # Если статус не "Новая", возвращаем ошибку
+            from django.http import HttpResponseForbidden
+            return HttpResponseForbidden("Нельзя удалить заявку, которая уже принята в работу или выполнена.")
 
 class CategoryListView(generic.ListView):
     """Generic class-based view listing categories."""
