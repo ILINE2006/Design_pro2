@@ -9,6 +9,7 @@ from .forms import ApplicationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import DeleteView
 from django.urls import reverse_lazy
+from django.http import HttpResponseForbidden
 
 
 def index(request):
@@ -18,11 +19,11 @@ def index(request):
     num_applications_in_progress = Application.objects.filter(status='in_progress').count()
 
     # Получаем 4 последние ВЫПОЛНЕННЫЕ заявки
-    num_completed_applications = Application.objects.filter(status='completed').order_by('-created_at')[:4]
+    completed_applications = Application.objects.filter(status='completed').order_by('-created_at')[:4]
 
     context = {
         'num_applications_in_progress': num_applications_in_progress,
-        'completed_applications': num_completed_applications,
+        'completed_applications': completed_applications,
     }
 
     # Рендерим HTML-шаблон index.html с данными внутри переменной context
@@ -76,7 +77,7 @@ def create_application(request):
             # Обрабатываем данные в form.cleaned_data
             application = form.save(commit=False)
             application.user = request.user
-            application.status = 'n'  # Статус "Новая"
+            application.status = 'new'  # Исправлено: 'new' вместо 'n'
             application.save()
 
             # Перенаправляем на страницу с заявками:
@@ -115,6 +116,17 @@ class ApplicationListView(LoginRequiredMixin, generic.ListView):
         return context
 
 
+# ДОБАВЬТЕ ЭТОТ КЛАСС - он отсутствует в вашем коде
+class ApplicationDetailView(LoginRequiredMixin, generic.DetailView):
+    """Generic class-based view detailing an application."""
+    model = Application
+    template_name = 'catalog/application_detail.html'
+
+    def get_queryset(self):
+        # Пользователь может просматривать только свои заявки
+        return Application.objects.filter(user=self.request.user)
+
+
 class ApplicationDeleteView(LoginRequiredMixin, DeleteView):
     """Generic class-based view for deleting an application."""
     model = Application
@@ -135,8 +147,8 @@ class ApplicationDeleteView(LoginRequiredMixin, DeleteView):
             return super().delete(request, *args, **kwargs)
         else:
             # Если статус не "Новая", возвращаем ошибку
-            from django.http import HttpResponseForbidden
             return HttpResponseForbidden("Нельзя удалить заявку, которая уже принята в работу или выполнена.")
+
 
 class CategoryListView(generic.ListView):
     """Generic class-based view listing categories."""
