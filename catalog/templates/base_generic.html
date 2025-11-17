@@ -24,8 +24,9 @@
             <ul class="sidebar-nav">
               <img src="" alt="">
               <li><a href="{% url 'index' %}">Design.pro</a></li>
-              <li><a href="">Создать заявку</a></li>
-              <li><a href="">Свои заявки</a></li>
+              <li><a href="{% url 'application-create' %}">Создать заявку</a></li>
+              <li><a href="{% url 'my-applications' %}">Свои заявки</a></li>
+              <li><a href="{% url 'category-list' %}">Категории</a></li>
               <li><a href="{% url 'register' %}">Регистрация</a></li>
             </ul>
 

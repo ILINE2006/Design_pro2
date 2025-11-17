@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import re
+from .models import Application
+
 
 
 class RegisterForm(forms.Form):
@@ -41,3 +43,30 @@ class RegisterForm(forms.Form):
             raise ValidationError('Пароли не совпадают')
 
         return cleaned_data
+
+
+class ApplicationForm(forms.ModelForm):
+    class Meta:
+        model = Application
+        fields = ['title', 'description', 'category', 'image']
+        labels = {
+            'title': 'Название заявки',
+            'description': 'Описание',
+            'category': 'Категория',
+            'image': 'Фото помещения',
+        }
+        help_texts = {
+            'title': 'Введите краткое название заявки',
+            'description': 'Подробно опишите, что нужно сделать',
+            'category': 'Выберите подходящую категорию',
+            'image': 'Загрузите фото или план помещения',
+        }
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image', False)
+        if image:
+            if image.size > 2 * 1024 * 1024:
+                raise forms.ValidationError("Размер изображения не должен превышать 2MB")
+            return image
+        else:
+            raise forms.ValidationError("Не удалось прочитать загруженное изображение")

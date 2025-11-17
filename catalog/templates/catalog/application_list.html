@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Мои заявки</h1>
+
+  <a href="{% url 'application-create' %}" class="btn btn-primary mb-3">Создать новую заявку</a>
+
+  {% if application_list %}
+    <ul class="list-group">
+      {% for application in application_list %}
+      <li class="list-group-item">
+        <h4><a href="{{ application.get_absolute_url }}">{{ application.title }}</a></h4>
+        <p><strong>Категория:</strong> {{ application.category }}</p>
+        <p><strong>Статус:</strong> {{ application.get_status_display }}</p>
+        <p><strong>Создана:</strong> {{ application.created_at }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>У вас пока нет заявок.</p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Создание заявки</h1>
+
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table>
+    {{ form.as_table }}
+    </table>
+    <input type="submit" value="Создать заявку" class="btn btn-primary">
+    <a href="{% url 'my-applications' %}" class="btn btn-secondary">Отмена</a>
+  </form>
+{% endblock %}
