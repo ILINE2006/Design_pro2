@@ -9,11 +9,144 @@
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+html, body {
+  height: 1000px;
+  margin: 0;
+  padding: 0;
+}
 
-    <!-- Добавление дополнительного статического CSS файла -->
-    {% load static %}
-    <img src="{% static 'catalog/images/local_library_model_uml.png' %}" alt="My image" style="width:555px;height:540px;" />
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+body {
+  background-color: #f8f9fa;
+  font-family: 'Arial', sans-serif;
+  height: 1000px;
+}
+
+.container-fluid {
+  padding: 0;
+  height: 1000px;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #87CEEB;
+  height: 1000px;
+  padding: 20px 0;
+}
+
+.sidebar-nav li {
+  margin: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+.sidebar-nav a {
+  display: block;
+  padding: 15px 25px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  font-weight: 500;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-nav a:hover {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  text-decoration: none;
+  padding-left: 30px;
+}
+
+.sidebar-nav .btn-link {
+  color: white;
+  text-decoration: none;
+  padding: 15px 25px;
+  text-align: left;
+  width: 100%;
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-nav .btn-link:hover {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  text-decoration: none;
+  padding-left: 30px;
+}
+
+.col-sm-10 {
+  background: white;
+  height: 1000px;
+  padding: 30px;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.sidebar-nav li:first-child {
+  border-top: none;
+}
+
+.sidebar-nav li:last-child {
+  border-bottom: none;
+}
+
+/* Стили для пользователя */
+.sidebar-nav li:has(form) {
+  color: white;
+  padding: 0;
+  background-color: transparent;
+  height: 50px;
+}
+
+.sidebar-nav li:has(form) .btn-link {
+  padding: 15px 25px;
+  height: 50px;
+}
+
+/* Стили для текста пользователя */
+.sidebar-nav li:not(:has(a)):not(:has(form)) {
+  color: white;
+  padding: 15px 25px;
+  background-color: rgba(0,0,0,0.1);
+  font-size: 16px;
+  font-weight: 500;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .col-sm-2 {
+    position: fixed;
+    z-index: 1000;
+    width: 250px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    height: 1000px;
+  }
+
+  .col-sm-2.active {
+    transform: translateX(0);
+  }
+
+  .col-sm-10 {
+    margin-left: 0;
+    width: 100%;
+    height: 1000px;
+  }
+}
+</style>
   </head>
 
   <body>
@@ -28,10 +161,8 @@
               <li><a href="{% url 'my-applications' %}">Свои заявки</a></li>
               <li><a href="{% url 'category-list' %}">Категории</a></li>
               <li><a href="{% url 'register' %}">Регистрация</a></li>
-            </ul>
-
-
-            <ul class="sidebar-nav">
+            <li><a href="{% url 'profile' %}">Профиль</a></li>
+                 <ul class="sidebar-nav">
               {% if user.is_authenticated %}
                 <li>User: {{ user.get_username }}</li>
 
@@ -47,6 +178,7 @@
             </ul>
           {% endblock %}
         </div>
+            </ul>
         <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
       </div>
     </div>

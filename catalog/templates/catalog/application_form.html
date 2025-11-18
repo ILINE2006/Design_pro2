@@ -1,14 +1,224 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Создание заявки</h1>
+<div class="application-create-container">
+  <h1 class="page-title">Создание заявки</h1>
 
-  <form action="" method="post" enctype="multipart/form-data">
+  <form action="" method="post" enctype="multipart/form-data" class="application-form">
     {% csrf_token %}
-    <table>
-    {{ form.as_table }}
-    </table>
-    <input type="submit" value="Создать заявку" class="btn btn-primary">
-    <a href="{% url 'my-applications' %}" class="btn btn-secondary">Отмена</a>
+
+    <div class="form-table">
+      {{ form.as_table }}
+    </div>
+
+    <div class="form-actions">
+      <input type="submit" value="Создать заявку" class="btn btn-primary btn-submit">
+      <a href="{% url 'my-applications' %}" class="btn btn-secondary btn-cancel">Отмена</a>
+    </div>
   </form>
+</div>
+
+<style>
+.application-create-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+}
+
+.page-title {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+.application-form {
+  width: 100%;
+}
+
+.form-table {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.form-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.form-table tr {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.form-table tr:last-child {
+  border-bottom: none;
+}
+
+.form-table td {
+  padding: 20px 15px;
+  vertical-align: top;
+}
+
+.form-table th {
+  padding: 20px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  width: 200px;
+  vertical-align: top;
+}
+
+/* Стили для полей ввода */
+.form-table input[type="text"],
+.form-table input[type="email"],
+.form-table input[type="tel"],
+.form-table textarea,
+.form-table select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.form-table input[type="text"]:focus,
+.form-table input[type="email"]:focus,
+.form-table input[type="tel"]:focus,
+.form-table textarea:focus,
+.form-table select:focus {
+  outline: none;
+  border-color: #87CEEB;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+}
+
+.form-table textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Стили для файлового input */
+.form-table input[type="file"] {
+  padding: 10px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.form-table input[type="file"]:hover {
+  border-color: #87CEEB;
+  background: #e3f2fd;
+}
+
+/* Стили для кнопок */
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.btn-submit {
+  background: #87CEEB;
+  border: none;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.btn-submit:hover {
+  background: #6cb8e0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(135, 206, 235, 0.4);
+  color: white;
+}
+
+.btn-cancel {
+  background: #dc3545;
+  border: none;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  color: white;
+  text-decoration: none;
+}
+
+.btn-cancel:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+/* Стили для ошибок валидации */
+.form-table .errorlist {
+  color: #dc3545;
+  font-size: 14px;
+  margin: 5px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.form-table .errorlist li {
+  background: #f8d7da;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 5px 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .application-create-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  .form-table th,
+  .form-table td {
+    display: block;
+    width: 100%;
+    padding: 15px 10px;
+  }
+
+  .form-table th {
+    background: #f8f9fa;
+    border-bottom: none;
+    font-weight: 600;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-submit,
+  .btn-cancel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .application-create-container {
+    padding: 15px;
+  }
+}
+</style>
 {% endblock %}

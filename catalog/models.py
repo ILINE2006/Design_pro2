@@ -7,7 +7,6 @@ class Category(models.Model):
     """Модель представляющая категорию заявки."""
     name = models.CharField(max_length=100, help_text="Введите название категории")
 
-    # ДОБАВЬТЕ ЭТО ПОЛЕ ↓
     image = models.ImageField(
         upload_to='categories/',
         verbose_name='Изображение категории',

@@ -25,9 +25,9 @@
   <div class="col-md-3 mb-4">
     <div class="card h-100">
       {% if app.image %}
-        <img src="{{ app.image.url }}" class="card-img-top" alt="{{ app.title }}" style="height: 200px; object-fit: cover;">
+        <img src="{{ app.image.url }}" class="card-img-top" alt="{{ app.title }}" style="width: 100%; height: 300px; object-fit: cover;">
       {% else %}
-        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 300px;">
           <span class="text-muted">Нет изображения</span>
         </div>
       {% endif %}
@@ -43,5 +43,64 @@
 {% else %}
   <p>Пока нет выполненных работ для показа.</p>
 {% endif %}
+
+<style>
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.card-img-top {
+  border-bottom: 1px solid #eee;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 15px;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.card-text {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.text-muted {
+  color: #999 !important;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 576px) {
+  .col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .card-img-top,
+  .bg-light {
+    height: 250px !important;
+  }
+}
+</style>
 
 {% endblock %}

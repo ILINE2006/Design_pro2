@@ -12,17 +12,9 @@
             <img src="{{ category.image.url }}" class="card-img-top"
                  alt="{{ category.name }}" style="height: 200px; object-fit: cover;">
           {% else %}
-            <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-                 style="height: 200px;">
-              <span class="text-muted">Нет изображения</span>
-            </div>
           {% endif %}
           <div class="card-body">
             <h5 class="card-title">{{ category.name }}</h5>
-          </div>
-          <div class="card-footer">
-            <a href="{% url 'application-create' %}?category={{ category.id }}"
-               class="btn btn-primary btn-sm">Создать заявку</a>
           </div>
         </div>
       </div>
