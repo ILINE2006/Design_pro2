@@ -1,0 +1,51 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Все заявки (Администратор)</h1>
+
+{% if application_list %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Пользователь</th>
+                <th>Категория</th>
+                <th>Статус</th>
+                <th>Дата создания</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for application in application_list %}
+            <tr>
+                <td>{{ application.title }}</td>
+                <td>{{ application.user.username }}</td>
+                <td>{{ application.category.name }}</td>
+                <td>
+                    <span class="badge
+                        {% if application.status == 'new' %}badge-secondary
+                        {% elif application.status == 'in_progress' %}badge-warning
+                        {% else %}badge-success{% endif %}">
+                        {{ application.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ application.created_at|date:"d.m.Y H:i" }}</td>
+                <td>
+                    {% if application.status == 'new' %}
+                    <a href="{% url 'change-application-status' application.pk %}" class="btn btn-primary btn-sm">
+                        Изменить статус
+                    </a>
+                    {% else %}
+                    <span class="text-muted">Статус изменен</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>Нет заявок.</p>
+{% endif %}
+{% endblock %}

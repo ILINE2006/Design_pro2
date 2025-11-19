@@ -1,26 +1,74 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Категории заявок</h1>
+<h1>Категории заявок</h1>
 
-  {% if category_list %}
-    <div class="row">
-      {% for category in category_list %}
-      <div class="col-md-4 mb-4">
+{% if user.is_authenticated and user.is_staff %}
+<div class="admin-actions mb-4">
+    <a href="{% url 'category-create' %}" class="btn btn-success">Добавить категорию</a>
+</div>
+{% endif %}
+
+{% if category_list %}
+<div class="row">
+    {% for category in category_list %}
+    <div class="col-md-4 mb-4">
         <div class="card h-100">
-          {% if category.image %}
+            {% if category.image %}
             <img src="{{ category.image.url }}" class="card-img-top"
-                 alt="{{ category.name }}" style="height: 200px; object-fit: cover;">
-          {% else %}
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">{{ category.name }}</h5>
-          </div>
+            alt="{{ category.name }}" style="height: 200px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ category.name }}</h5>
+                <p class="card-text">
+                    <small class="text-muted">
+                        Заявок в категории: {{ category.application_set.count }}
+                    </small>
+                </p>
+            </div>
+            {% if user.is_authenticated and user.is_staff %}
+            <div class="card-footer">
+                <div class="btn-group w-100">
+                    <a href="{% url 'category-update' category.pk %}" class="btn btn-primary btn-sm">Редактировать</a>
+                    <a href="{% url 'category-delete' category.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                </div>
+            </div>
+            {% endif %}
         </div>
-      </div>
-      {% endfor %}
     </div>
-  {% else %}
-    <p>Категории пока не созданы.</p>
-  {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+<p>Категории пока не созданы.</p>
+{% if user.is_authenticated and user.is_staff %}
+<a href="{% url 'category-create' %}" class="btn btn-success">Создать первую категорию</a>
+{% endif %}
+{% endif %}
+
+<style>
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-footer {
+    background: transparent;
+    border-top: 1px solid #eee;
+    padding: 10px;
+}
+
+.btn-group .btn {
+    flex: 1;
+}
+
+.admin-actions {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+</style>
 {% endblock %}

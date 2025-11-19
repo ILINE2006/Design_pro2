@@ -1,0 +1,44 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>{% if object %}Редактирование категории{% else %}Создание категории{% endif %}</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-group">
+        {{ form.as_p }}
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+            {% if object %}Сохранить{% else %}Создать{% endif %}
+        </button>
+        <a href="{% url 'category-list' %}" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+
+<style>
+.form-group p {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+</style>
+{% endblock %}

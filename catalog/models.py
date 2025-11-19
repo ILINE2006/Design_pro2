@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Category(models.Model):
@@ -10,7 +12,7 @@ class Category(models.Model):
     image = models.ImageField(
         upload_to='categories/',
         verbose_name='Изображение категории',
-        help_text='Загрузите изображение для категории',
+        help_text='Загрузите изображение для категории (необязательно)',
         blank=True,
         null=True
     )
@@ -23,7 +25,6 @@ class Category(models.Model):
         """Возвращает URL для доступа к конкретному экземпляру категории."""
         return reverse('category-detail', args=[str(self.id)])
 
-    # ДОБАВЬТЕ ЭТОТ МЕТОД ↓
     def image_url(self):
         """Возвращает URL изображения или None если его нет."""
         if self.image and hasattr(self.image, 'url'):
@@ -44,12 +45,29 @@ class Application(models.Model):
         help_text="Выберите категорию для этой заявки"
     )
 
-    # Поле для изображения
+    # Поле для изображения помещения
     image = models.ImageField(
         upload_to='applications/',
         null=True,
         blank=True,
         help_text="Загрузите фото помещения (JPG, JPEG, PNG, BMP, макс. 2MB)"
+    )
+
+    #  изображение дизайна (для статуса "Выполнено")
+    design_image = models.ImageField(
+        upload_to='designs/',
+        null=True,
+        blank=True,
+        verbose_name='Изображение дизайна',
+        help_text="Загрузите изображение готового дизайна"
+    )
+
+    #  комментарий администратора (для статуса "Принято в работу")
+    admin_comment = models.TextField(
+        max_length=1000,
+        blank=True,
+        verbose_name='Комментарий администратора',
+        help_text="Комментарий при принятии заявки в работу"
     )
 
     # Статус заявки
@@ -94,3 +112,30 @@ class Application(models.Model):
     def can_be_deleted(self):
         """Можно удалять только заявки со статусом 'Новая'"""
         return self.status == 'new'
+
+    def can_change_status(self):
+        """Можно менять статус только у заявок со статусом 'Новая'"""
+        return self.status == 'new'
+
+
+class UserProfile(models.Model):
+    """Модель для расширения пользователя (администратор/сотрудник)."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_employee = models.BooleanField(default=False, verbose_name="Сотрудник")
+
+    def __str__(self):
+        return f"{self.user.username} - {'Сотрудник' if self.is_employee else 'Клиент'}"
+
+
+# Автоматическое создание профиля при создании пользователя
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'userprofile'):
+        instance.userprofile.save()
+    else:
+        UserProfile.objects.create(user=instance)

@@ -13,4 +13,12 @@ urlpatterns = [
     path('application/create/', views.create_application, name='application-create'),
     path('application/<int:pk>/delete/', views.ApplicationDeleteView.as_view(), name='application-delete'),
     path('categories/', views.CategoryListView.as_view(), name='category-list'),
+    # URL для администратора
+    path('admin/applications/', views.all_applications_list, name='all-applications-list'),
+    path('admin/application/<int:pk>/change/', views.change_application_status, name='change-application-status'),
+
+    # URL для управления категориями
+    path('categories/create/', views.CategoryCreateView.as_view(), name='category-create'),
+    path('categories/<int:pk>/update/', views.CategoryUpdateView.as_view(), name='category-update'),
+    path('categories/<int:pk>/delete/', views.CategoryDeleteView.as_view(), name='category-delete'),
 ]

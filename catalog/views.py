@@ -1,13 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
+from .forms import RegisterForm, ApplicationForm, ApplicationStatusForm
+from .models import Application, Category, UserProfile
 from django.views import generic
-from .models import Application, Category
-from .forms import ApplicationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import DeleteView
+from django.views.generic.edit import DeleteView, CreateView, UpdateView
 from django.urls import reverse_lazy
 from django.http import HttpResponseForbidden
 
@@ -15,10 +16,7 @@ from django.http import HttpResponseForbidden
 def index(request):
     """View function for home page of site."""
 
-    # Генерируем counts некоторых главных объектов
     num_applications_in_progress = Application.objects.filter(status='in_progress').count()
-
-    # Получаем 4 последние ВЫПОЛНЕННЫЕ заявки
     completed_applications = Application.objects.filter(status='completed').order_by('-created_at')[:4]
 
     context = {
@@ -26,7 +24,6 @@ def index(request):
         'completed_applications': completed_applications,
     }
 
-    # Рендерим HTML-шаблон index.html с данными внутри переменной context
     return render(request, 'index.html', context=context)
 
 
@@ -40,7 +37,6 @@ def register(request):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            # Создаем пользователя
             user = User.objects.create_user(
                 username=form.cleaned_data['username'],
                 email=form.cleaned_data['email'],
@@ -48,7 +44,6 @@ def register(request):
                 first_name=form.cleaned_data['first_name']
             )
 
-            # Автоматический вход
             user = authenticate(
                 username=form.cleaned_data['username'],
                 password=form.cleaned_data['password']
@@ -66,24 +61,15 @@ def register(request):
 def create_application(request):
     """View function for creating an application."""
 
-    # Если это POST запрос, обрабатываем данные формы
     if request.method == 'POST':
-
-        # Создаем экземпляр формы и заполняем данными из запроса:
         form = ApplicationForm(request.POST, request.FILES)
 
-        # Проверяем валидность формы:
         if form.is_valid():
-            # Обрабатываем данные в form.cleaned_data
             application = form.save(commit=False)
             application.user = request.user
-            application.status = 'new'  # Исправлено: 'new' вместо 'n'
+            application.status = 'new'
             application.save()
-
-            # Перенаправляем на страницу с заявками:
             return redirect('my-applications')
-
-    # Если это GET (или любой другой) запрос, создаем пустую форму
     else:
         form = ApplicationForm()
 
@@ -97,33 +83,26 @@ class ApplicationListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Получаем базовый queryset - все заявки пользователя
         qs = Application.objects.filter(user=self.request.user)
+        status_filter = self.request.GET.get('status')
 
-        # Получаем параметр фильтра из GET-запроса
-        status_filter = self.request.GET.get('status', None)
-
-        # Если параметр передан и он не пустой, применяем фильтр
         if status_filter:
             qs = qs.filter(status=status_filter)
 
         return qs
 
     def get_context_data(self, **kwargs):
-        # Добавляем в контекст текущее значение фильтра
         context = super().get_context_data(**kwargs)
         context['current_status'] = self.request.GET.get('status', '')
         return context
 
 
-# ДОБАВЬТЕ ЭТОТ КЛАСС - он отсутствует в вашем коде
 class ApplicationDetailView(LoginRequiredMixin, generic.DetailView):
     """Generic class-based view detailing an application."""
     model = Application
     template_name = 'catalog/application_detail.html'
 
     def get_queryset(self):
-        # Пользователь может просматривать только свои заявки
         return Application.objects.filter(user=self.request.user)
 
 
@@ -134,19 +113,15 @@ class ApplicationDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('my-applications')
 
     def get_queryset(self):
-        # Пользователь может удалять только свои заявки
-        qs = super().get_queryset()
-        return qs.filter(user=self.request.user)
+        return Application.objects.filter(user=self.request.user)
 
-    def delete(self, request, *args, **kwargs):
-        # Получаем объект для удаления
-        self.object = self.get_object()
+    def post(self, request, pk):
+        application = get_object_or_404(Application, pk=pk, user=request.user)
 
-        # Проверяем, можно ли удалять заявку (статус "Новая")
-        if self.object.can_be_deleted():
-            return super().delete(request, *args, **kwargs)
+        if application.can_be_deleted():
+            application.delete()
+            return redirect(self.success_url)
         else:
-            # Если статус не "Новая", возвращаем ошибку
             return HttpResponseForbidden("Нельзя удалить заявку, которая уже принята в работу или выполнена.")
 
 
@@ -155,3 +130,77 @@ class CategoryListView(generic.ListView):
     model = Category
     template_name = 'catalog/category_list.html'
     context_object_name = 'category_list'
+
+
+# Административные функции
+@staff_member_required
+def all_applications_list(request):
+    """Список всех заявок для администратора."""
+    applications = Application.objects.all().order_by('-created_at')
+    return render(request, 'catalog/all_applications_list.html', {'application_list': applications})
+
+
+@staff_member_required
+def change_application_status(request, pk):
+    """Изменение статуса заявки администратором с проверками."""
+    application = get_object_or_404(Application, pk=pk)
+
+    # Проверяем, можно ли менять статус
+    if not application.can_change_status():
+        messages.error(request, "Нельзя изменить статус заявки, которая уже принята в работу или выполнена.")
+        return redirect('all-applications-list')
+
+    if request.method == 'POST':
+        form = ApplicationStatusForm(request.POST, request.FILES, instance=application)
+        if form.is_valid():
+            application = form.save()
+            messages.success(request,
+                             f'Статус заявки "{application.title}" изменен на "{application.get_status_display()}"')
+            return redirect('all-applications-list')
+    else:
+        form = ApplicationStatusForm(instance=application)
+
+    return render(request, 'catalog/change_application_status.html', {
+        'application': application,
+        'form': form
+    })
+
+
+# Классы для управления категориями
+class CategoryCreateView(LoginRequiredMixin, CreateView):
+    model = Category
+    fields = ['name']  # УБРАЛИ 'image' - теперь только название
+    template_name = 'catalog/category_form.html'
+    success_url = reverse_lazy('category-list')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return HttpResponseForbidden("У вас нет прав для выполнения этого действия")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+    model = Category
+    fields = ['name', 'image']  # Оставили image для редактирования, но не обязательно
+    template_name = 'catalog/category_form.html'
+    success_url = reverse_lazy('category-list')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return HttpResponseForbidden("У вас нет прав для выполнения этого действия")
+        return super().dispatch(request, *args, **kwargs)
+
+class CategoryDeleteView(LoginRequiredMixin, DeleteView):
+    model = Category
+    template_name = 'catalog/category_confirm_delete.html'
+    success_url = reverse_lazy('category-list')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return HttpResponseForbidden("У вас нет прав для выполнения этого действия")
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, pk):
+        category = get_object_or_404(Category, pk=pk)
+        category.delete()
+        return redirect(self.success_url)

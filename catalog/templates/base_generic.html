@@ -162,6 +162,10 @@ body {
               <li><a href="{% url 'category-list' %}">Категории</a></li>
               <li><a href="{% url 'register' %}">Регистрация</a></li>
             <li><a href="{% url 'profile' %}">Профиль</a></li>
+              {% if user.is_authenticated and user.is_staff %}
+              <li><a href="{% url 'all-applications-list' %}">Все заявки (Админ)</a></li>
+              <li><a href="{% url 'category-create' %}">Добавить категорию</a></li>
+             {% endif %}
                  <ul class="sidebar-nav">
               {% if user.is_authenticated %}
                 <li>User: {{ user.get_username }}</li>

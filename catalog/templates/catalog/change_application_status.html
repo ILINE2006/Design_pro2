@@ -1,0 +1,71 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Изменение статуса заявки</h1>
+
+<div class="application-details">
+    <p><strong>Название:</strong> {{ application.title }}</p>
+    <p><strong>Пользователь:</strong> {{ application.user.username }}</p>
+    <p><strong>Текущий статус:</strong> {{ application.get_status_display }}</p>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-group">
+        {{ form.as_p }}
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Внимание!</strong><br>
+        - Для статуса "Выполнено" обязательно загрузите изображение дизайна<br>
+        - Для статуса "Принято в работу" обязательно укажите комментарий
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        <a href="{% url 'all-applications-list' %}" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+
+<style>
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group p {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-group textarea {
+    min-height: 100px;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+.application-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}

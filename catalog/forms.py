@@ -5,7 +5,6 @@ import re
 from .models import Application
 
 
-
 class RegisterForm(forms.Form):
     first_name = forms.CharField(label='ФИО', max_length=100)
     username = forms.CharField(label='Логин', max_length=100)
@@ -67,6 +66,36 @@ class ApplicationForm(forms.ModelForm):
         if image:
             if image.size > 2 * 1024 * 1024:
                 raise forms.ValidationError("Размер изображения не должен превышать 2MB")
-            return image
-        else:
-            raise forms.ValidationError("Не удалось прочитать загруженное изображение")
+        return image
+
+
+class ApplicationStatusForm(forms.ModelForm):
+    """Форма для изменения статуса заявки администратором."""
+    class Meta:
+        model = Application
+        fields = ['status', 'design_image', 'admin_comment']
+        labels = {
+            'status': 'Новый статус',
+            'design_image': 'Изображение дизайна (обязательно для статуса "Выполнено")',
+            'admin_comment': 'Комментарий (обязательно для статуса "Принято в работу")',
+        }
+        help_texts = {
+            'design_image': 'Загрузите изображение готового дизайна',
+            'admin_comment': 'Укажите комментарий при принятии заявки в работу',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        status = cleaned_data.get('status')
+        design_image = cleaned_data.get('design_image')
+        admin_comment = cleaned_data.get('admin_comment')
+
+        # Проверка для статуса "Выполнено"
+        if status == 'completed' and not design_image:
+            raise forms.ValidationError("Для статуса 'Выполнено' обязательно нужно загрузить изображение дизайна.")
+
+        # Проверка для статуса "Принято в работу"
+        if status == 'in_progress' and not admin_comment:
+            raise forms.ValidationError("Для статуса 'Принято в работу' обязательно нужно указать комментарий.")
+
+        return cleaned_data
