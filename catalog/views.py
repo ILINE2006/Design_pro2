@@ -147,7 +147,7 @@ def change_application_status(request, pk):
     """Изменение статуса заявки администратором с проверками."""
     application = get_object_or_404(Application, pk=pk)
 
-    # Проверяем, можно ли менять статус
+    # Проверка, можно ли менять статус
     if not application.can_change_status():
         messages.error(request, "Нельзя изменить статус заявки, которая уже принята в работу или выполнена.")
         return redirect('all-applications-list')
@@ -171,7 +171,7 @@ def change_application_status(request, pk):
 # Классы для управления категориями
 class CategoryCreateView(LoginRequiredMixin, CreateView):
     model = Category
-    fields = ['name']  # УБРАЛИ 'image' - теперь только название
+    fields = ['name']
     template_name = 'catalog/category_form.html'
     success_url = reverse_lazy('category-list')
 
@@ -183,7 +183,7 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
 
 class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Category
-    fields = ['name', 'image']  # Оставили image для редактирования, но не обязательно
+    fields = ['name', 'image']
     template_name = 'catalog/category_form.html'
     success_url = reverse_lazy('category-list')
 

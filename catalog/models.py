@@ -99,7 +99,7 @@ class Application(models.Model):
         return reverse('application-detail', args=[str(self.id)])
 
     def display_category(self):
-        """Создает строку для категории. Это требуется для отображения в Admin."""
+        """Создает строку для категории. Это требуется для отображения в Admin./"""
         return self.category.name
 
     display_category.short_description = 'Category'
