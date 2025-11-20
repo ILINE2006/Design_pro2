@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import mark_safe
 from django import forms
-from .models import Category, Application  # ДОБАВИТЬ Application в импорт
+from .models import Category, Application
 
 
 class ApplicationAdminForm(forms.ModelForm):
