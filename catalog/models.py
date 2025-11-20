@@ -1,14 +1,10 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 
 class Category(models.Model):
     """Модель представляющая категорию заявки."""
     name = models.CharField(max_length=100, help_text="Введите название категории")
-
     image = models.ImageField(
         upload_to='categories/',
         verbose_name='Изображение категории',
@@ -31,7 +27,6 @@ class Category(models.Model):
             return self.image.url
         return None
 
-
 class Application(models.Model):
     """Модель представляющая заявку пользователя."""
     title = models.CharField(max_length=200)
@@ -53,7 +48,7 @@ class Application(models.Model):
         help_text="Загрузите фото помещения (JPG, JPEG, PNG, BMP, макс. 2MB)"
     )
 
-    #  изображение дизайна (для статуса "Выполнено")
+    # изображение дизайна (для статуса "Выполнено")
     design_image = models.ImageField(
         upload_to='designs/',
         null=True,
@@ -62,7 +57,7 @@ class Application(models.Model):
         help_text="Загрузите изображение готового дизайна"
     )
 
-    #  комментарий администратора (для статуса "Принято в работу")
+    # комментарий администратора (для статуса "Принято в работу")
     admin_comment = models.TextField(
         max_length=1000,
         blank=True,
@@ -93,7 +88,7 @@ class Application(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['created_at']
 
     def __str__(self):
         """Строка для представления объекта Model."""
@@ -117,7 +112,6 @@ class Application(models.Model):
         """Можно менять статус только у заявок со статусом 'Новая'"""
         return self.status == 'new'
 
-
 class UserProfile(models.Model):
     """Модель для расширения пользователя (администратор/сотрудник)."""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -125,17 +119,3 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {'Сотрудник' if self.is_employee else 'Клиент'}"
-
-
-# Автоматическое создание профиля при создании пользователя
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'userprofile'):
-        instance.userprofile.save()
-    else:
-        UserProfile.objects.create(user=instance)

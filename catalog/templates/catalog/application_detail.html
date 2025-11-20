@@ -1,19 +1,28 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>{{ application.title }}</h1>
+<h1>{{ application.title }}</h1>
 
-  <p><strong>Описание:</strong> {{ application.description }}</p>
-  <p><strong>Категория:</strong> {{ application.category }}</p>
-  <p><strong>Статус:</strong> {{ application.get_status_display }}</p>
-  <p><strong>Дата создания:</strong> {{ application.created_at }}</p>
+<p><strong>Описание:</strong> {{ application.description }}</p>
+<p><strong>Категория:</strong> {{ application.category }}</p>
+<p><strong>Статус:</strong> {{ application.get_status_display }}</p>
+<p><strong>Дата создания:</strong> {{ application.created_at }}</p>
 
-  {% if application.image %}
-    <p><strong>Изображение:</strong></p>
-    <img src="{{ application.image.url }}" alt="{{ application.title }}" class="img-fluid" style="max-width: 500px;">
-  {% endif %}
+{% if application.admin_comment %}
+<p><strong>Комментарий администратора:</strong> {{ application.admin_comment }}</p>
+{% endif %}
 
-  <div style="margin-top: 20px">
+{% if application.image %}
+<p><strong>Изображение помещения:</strong></p>
+<img src="{{ application.image.url }}" alt="{{ application.title }}" class="img-fluid" style="max-width: 500px;">
+{% endif %}
+
+{% if application.design_image %}
+<p><strong>Изображение дизайна:</strong></p>
+<img src="{{ application.design_image.url }}" alt="Дизайн {{ application.title }}" class="img-fluid" style="max-width: 500px;">
+{% endif %}
+
+<div style="margin-top: 20px">
     <a href="{% url 'my-applications' %}" class="btn btn-primary">Вернуться к списку</a>
-  </div>
+</div>
 {% endblock %}

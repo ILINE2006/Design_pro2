@@ -44,12 +44,14 @@ def register(request):
                 first_name=form.cleaned_data['first_name']
             )
 
+            # Создаем UserProfile для нового пользователя
+            UserProfile.objects.create(user=user)
+
             user = authenticate(
                 username=form.cleaned_data['username'],
                 password=form.cleaned_data['password']
             )
             login(request, user)
-
             return redirect('profile')
     else:
         form = RegisterForm()
